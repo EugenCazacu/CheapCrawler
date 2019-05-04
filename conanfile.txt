@@ -1,0 +1,13 @@
+[requires]
+boost_asio/1.69.0@bincrafters/stable
+boost_program_options/1.69.0@bincrafters/stable
+gtest/1.8.1@bincrafters/stable
+libcurl/7.61.1@bincrafters/stable
+
+[generators]
+cmake_paths
+cmake_find_package
+
+[imports]
+bin, *.dll -> ./bin # Copies all dll files from packages bin folder to my "bin" folder
+lib, *.dylib* -> ./bin # Copies all dylib files from packages lib folder to my "bin" folder

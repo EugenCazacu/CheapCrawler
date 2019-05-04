@@ -1,0 +1,11 @@
+build/
+release/
+debug/
+*.swp
+.ycm_extra_conf.py
+.ycm_extra_conf.pyc
+.DS_Store
+*-shm
+*-wal
+/.cproject
+/.project

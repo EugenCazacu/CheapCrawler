@@ -1,0 +1,9 @@
+---
+Checks: >
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*
+
+HeaderFilterRegex: '.*'
+...
