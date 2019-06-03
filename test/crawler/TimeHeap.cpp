@@ -14,10 +14,10 @@ struct TimeHeapFixture : public ::testing::Test {
       , dwList2x2Urls{}
       , dwQueueItUrl1{dwList2x2Urls.getQueueByHost("url1.com")}
       , dwQueueItUrl2{dwList2x2Urls.getQueueByHost("url2.com")} {
-    dwList2x2Urls.addDownload(dwQueueItUrl1, {url1_1});
-    dwList2x2Urls.addDownload(dwQueueItUrl1, {url1_2});
-    dwList2x2Urls.addDownload(dwQueueItUrl2, {url2_1});
-    dwList2x2Urls.addDownload(dwQueueItUrl2, {url2_2});
+    addDownload(dwQueueItUrl1, {url1_1});
+    addDownload(dwQueueItUrl1, {url1_2});
+    addDownload(dwQueueItUrl2, {url2_1});
+    addDownload(dwQueueItUrl2, {url2_2});
   }
   Url                             url1_1;
   Url                             url1_2;

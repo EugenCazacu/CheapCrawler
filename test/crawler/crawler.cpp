@@ -1,6 +1,7 @@
 #include "Logger.h"
 LOG_INIT(crawler_tests);
 
+#include "ResultCallbackMock.h"
 #include "DownloadResult.h"
 #include "crawler/crawler.h"
 
@@ -121,27 +122,6 @@ private:
   std::atomic_size_t                                       m_crtNrDownloads;
   std::chrono::seconds                                     m_expectedDelay;
   std::unordered_map<std::string, SteadyTime>              m_hostTime;
-};
-
-class ResultCallbackMock {
-public:
-  ResultCallbackMock(const std::string& url, int index)
-      : dwElem{{url, index}, [this](DownloadResult&& dwResult) {
-                 LOG_DEBUG("ResultCallbackMock callback: " << dwResult.url);
-                 cb(dwResult);
-               }} {}
-
-  DownloadElem enableDownload() {
-    LOG_DEBUG("ResultCallbackMock enableDownload: " << dwElem.url);
-    EXPECT_CALL(*this, cb(Field(&DownloadResult::url, Eq(this->getUrl()))));
-    return dwElem;
-  }
-
-  Url getUrl() const { return dwElem.url; }
-
-private:
-  MOCK_METHOD1(cb, void(DownloadResult&));
-  DownloadElem dwElem;
 };
 
 struct CrawlerFixture : public ::testing::Test {
@@ -282,6 +262,24 @@ TEST_P(CrawlerOnceFixture, onlyOneRobotPerProtocolAndHost) {
       .After(robotsDownload);
   EXPECT_CALL(downloaderMock, doDownloadProxy(Field(&DownloadElem::url, Eq(sampleHost1Url4.getUrl()))))
       .After(robotsDownload);
+
+  crawlAndWaitForDownloadsToFinish();
+}
+
+TEST_P(CrawlerOnceFixture, oneRobotForEachProtocol) {
+  EXPECT_CALL(dispatcherMock, doGetUrls())
+      .WillOnce(Return(std::vector<DownloadElem>{
+          sampleHost1Url1.enableDownload(),
+          sampleHost1Url2.enableDownload(),
+          sampleHost1Url1s.enableDownload(),
+      }));
+
+  Expectation rob1  = EXPECT_CALL(downloaderMock, doDownloadProxy(robotEq(sampleUrl1RobotsTxt)));
+  Expectation rob1s = EXPECT_CALL(downloaderMock, doDownloadProxy(robotEq(sampleUrl1RobotsTxts)));
+
+  EXPECT_CALL(downloaderMock, doDownloadProxy(Field(&DownloadElem::url, Eq(sampleHost1Url1.getUrl())))).After(rob1);
+  EXPECT_CALL(downloaderMock, doDownloadProxy(Field(&DownloadElem::url, Eq(sampleHost1Url2.getUrl())))).After(rob1);
+  EXPECT_CALL(downloaderMock, doDownloadProxy(Field(&DownloadElem::url, Eq(sampleHost1Url1s.getUrl())))).After(rob1s);
 
   crawlAndWaitForDownloadsToFinish();
 }

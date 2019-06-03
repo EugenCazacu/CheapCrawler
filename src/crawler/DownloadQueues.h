@@ -18,10 +18,6 @@ public:
     return dwListMapIt;
   }
 
-  void addDownload(DownloadQueueIt dwQueue, DownloadElem download) {
-    dwQueue->second.emplace_back(std::move(download));
-  }
-
   DownloadElem popDownload(DownloadQueueIt dwQueue) {
     if(dwQueue->second.empty()) {
       throw std::runtime_error("DownloadQueues ERROR: poping from empty queue");
@@ -48,6 +44,10 @@ public:
 private:
   std::map<std::string, DownloadQueue> m_downloads;
 };
+
+inline void addDownload(DownloadQueues::DownloadQueueIt dwQueue, DownloadElem download) {
+  dwQueue->second.emplace_back(std::move(download));
+}
 
 inline std::ostream&
 operator<<(std::ostream& out, DownloadQueues::DownloadQueueIt dwQueue) {
