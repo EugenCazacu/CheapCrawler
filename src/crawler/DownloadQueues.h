@@ -5,12 +5,27 @@
 #include <iterator>
 #include <map>
 #include <ostream>
+#include <string_view>
+
+struct PreparedDownloadElem {
+  DownloadElem downloadElem;
+  std::string_view scheme;
+  std::string_view host;
+};
+
+inline std::ostream&
+operator<<(std::ostream& out, const PreparedDownloadElem& preparedDownloadElem) {
+  out << preparedDownloadElem.downloadElem;
+  return out;
+}
+
+using DownloadQueue = std::vector<PreparedDownloadElem>;
 
 class DownloadQueues {
 public:
-  using DownloadQueueIt = std::map<std::string, DownloadQueue>::iterator;
+  using DownloadQueueIt = std::map<std::string, DownloadQueue, std::less<>>::iterator;
 
-  DownloadQueueIt getQueueByHost(const std::string& host) {
+  DownloadQueueIt getQueueByHost(std::string_view host) {
     auto dwListMapIt = m_downloads.find(host);
     if(end() == dwListMapIt) {
       dwListMapIt = m_downloads.insert(std::make_pair(host, DownloadQueue{})).first;
@@ -18,11 +33,11 @@ public:
     return dwListMapIt;
   }
 
-  DownloadElem popDownload(DownloadQueueIt dwQueue) {
+  PreparedDownloadElem popDownload(DownloadQueueIt dwQueue) {
     if(dwQueue->second.empty()) {
       throw std::runtime_error("DownloadQueues ERROR: poping from empty queue");
     }
-    DownloadElem result = dwQueue->second.back();
+    PreparedDownloadElem result = dwQueue->second.back();
     dwQueue->second.pop_back();
     return result;
   }
@@ -42,17 +57,17 @@ public:
   bool empty() const { return m_downloads.empty(); }
 
 private:
-  std::map<std::string, DownloadQueue> m_downloads;
+  std::map<std::string, DownloadQueue, std::less<>> m_downloads;
 };
 
-inline void addDownload(DownloadQueues::DownloadQueueIt dwQueue, DownloadElem download) {
+inline void addDownload(DownloadQueues::DownloadQueueIt dwQueue, PreparedDownloadElem download) {
   dwQueue->second.emplace_back(std::move(download));
 }
 
 inline std::ostream&
 operator<<(std::ostream& out, DownloadQueues::DownloadQueueIt dwQueue) {
   out << "Host: " << dwQueue->first << std::endl;
-  std::copy(begin(dwQueue->second), end(dwQueue->second), std::ostream_iterator<DownloadElem>(out, "\n"));
+  std::copy(begin(dwQueue->second), end(dwQueue->second), std::ostream_iterator<PreparedDownloadElem>(out, "\n"));
   return out;
 }
 
@@ -60,7 +75,7 @@ inline std::ostream&
 operator<<(std::ostream& out, DownloadQueues& dwQueues) {
   std::for_each(std::begin(dwQueues), std::end(dwQueues), [&](const auto& dwQueue) {
     out << "Host: " << dwQueue.first << std::endl;
-    std::copy(begin(dwQueue.second), end(dwQueue.second), std::ostream_iterator<DownloadElem>(out, "\n"));
+    std::copy(begin(dwQueue.second), end(dwQueue.second), std::ostream_iterator<PreparedDownloadElem>(out, "\n"));
   });
   return out;
 }

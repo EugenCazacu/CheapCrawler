@@ -113,7 +113,7 @@ Crawler::Pimpl::crawl() {
         else {
           do {
             LOG_DEBUG("Adding new download");
-            m_downloader->download(timeHeap.pop());
+            m_downloader->download(timeHeap.pop().downloadElem);
             ++activeDownloads;
           } while(::canAddDownload(activeDownloads, m_maxActiveDownloads) && !timeHeap.empty()
                   && crtTime >= timeHeap.topTime());

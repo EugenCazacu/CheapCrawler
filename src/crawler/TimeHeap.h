@@ -25,7 +25,7 @@ public:
 
   bool empty() const { return m_heap.empty(); }
 
-  DownloadElem pop() {
+  PreparedDownloadElem pop() {
     if(empty()) {
       throw std::logic_error("error trying to pop from empty TimeHeap");
     }
@@ -35,7 +35,7 @@ public:
     return result;
   }
 
-  void push(std::function<DownloadElem()> queueElem, std::chrono::seconds delay = std::chrono::seconds{0}) {
+  void push(std::function<PreparedDownloadElem()> queueElem, std::chrono::seconds delay = std::chrono::seconds{0}) {
     m_heap.emplace_back(delay + std::chrono::steady_clock::now(), queueElem);
     push_heap(begin(m_heap), end(m_heap), HeapCmp());
   }
@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  using HeapT = std::vector<std::tuple<SteadyTime, std::function<DownloadElem()>>>;
+  using HeapT = std::vector<std::tuple<SteadyTime, std::function<PreparedDownloadElem()>>>;
   HeapT m_heap;
   struct HeapCmp {
     bool operator()(HeapT::const_reference e1, HeapT::const_reference e2) { return std::get<0>(e2) < std::get<0>(e1); }

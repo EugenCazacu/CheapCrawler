@@ -9,19 +9,30 @@
 
 struct DownloadResult;
 
-using Url = std::tuple<std::string, int>;
+struct Url {
+  std::string url;
+  int id;
+};
 
 struct DownloadElem {
-  Url                                   url;
+  Url url;
   std::function<void(DownloadResult&&)> callback;
 };
 
-using DownloadQueue = std::vector<DownloadElem>;
+inline std::ostream&
+operator<<(std::ostream& out, const Url& url) {
+  out << '(' << url.url << ',' << url.id << ')';
+  return out;
+}
 
 inline std::ostream&
 operator<<(std::ostream& out, const DownloadElem& dwElem) {
-  out << '(' << std::get<0>(dwElem.url) << ',' << std::get<1>(dwElem.url) << ')';
+  out << dwElem.url;
   return out;
+}
+
+inline bool operator==(const Url& url1, const Url& url2) {
+  return url1.url == url2.url && url1.id == url2.id;
 }
 
 #endif /* end of include guard: CRAWLER_URL_H_X64B8M1L */

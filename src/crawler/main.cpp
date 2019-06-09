@@ -114,7 +114,7 @@ public:
   void operator()(std::shared_ptr<DownloadResult> downloadResult) {
     // Process your own downloads sequentially here
     // e.g. write each download result into separate file
-    std::ofstream fout(this->generateFilename(std::get<0>(downloadResult->url)));
+    std::ofstream fout(this->generateFilename(downloadResult->url.url));
     if(downloadResult->success) {
       fout << downloadResult->content;
     }

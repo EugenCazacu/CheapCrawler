@@ -1,6 +1,7 @@
 set(TEST_TARGET_DIR ${PROJECT_SOURCE_DIR}/src/crawler)
 
 add_executable(CrawlerTests
+  RobotsFilter.cpp
   RobotsLogic.cpp
   TimeHeap.cpp
   ActionQueue.cpp

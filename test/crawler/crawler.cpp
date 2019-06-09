@@ -66,13 +66,13 @@ class DownloaderMock : public Downloader {
 private:
   void doDownload(DownloadElem&& elem) {
     LOG_DEBUG("[DownloaderMock::doDownload] newDownload: " << elem);
-    const std::string host       = getHost(std::get<0>(elem.url));
+    const std::string host       = getHost(elem.url.url);
     auto              hostTimeIt = m_hostTime.find(host);
     SteadyTime        now        = std::chrono::steady_clock::now();
     if(hostTimeIt != end(m_hostTime) && (now < (hostTimeIt->second + m_expectedDelay))) {
       std::chrono::steady_clock::duration remaining  = (now - hostTimeIt->second) - m_expectedDelay;
       std::chrono::milliseconds           durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(remaining);
-      throw std::logic_error("Too short time between downloads detected for: " + std::get<0>(elem.url)
+      throw std::logic_error("Too short time between downloads detected for: " + elem.url.url
                              + " Remaining expected time (ms): " + std::to_string(durationMs.count()));
     }
     m_hostTime[host]   = now;
@@ -223,8 +223,8 @@ struct CrawlerOnceFixture
 
 INSTANTIATE_TEST_CASE_P(VariousMaxDownloads, CrawlerOnceFixture, ::testing::Values(1, 5));
 
-MATCHER_P(match0thOfTuple, expected, "") { return (std::get<0>(arg) == expected); }
-MATCHER_P(robotEq, expected, "") { return expected == std::get<0>(arg.url); }
+MATCHER_P(match0thOfTuple, expected, "") { return (arg.url == expected); }
+MATCHER_P(robotEq, expected, "") { return expected == arg.url.url; }
 
 TEST_P(CrawlerOnceFixture, robotsTxtForUrl) {
   EXPECT_CALL(dispatcherMock, doGetUrls())
@@ -317,8 +317,9 @@ TEST_P(CrawlerOnceFixture, testMaxActiveQueues) {
   urls.reserve(nrHosts * urlsPerHost);
   for(size_t hostNr = 0; hostNr < nrHosts; ++hostNr)
     for(size_t urlNr = 0; urlNr < urlsPerHost; ++urlNr) {
+      const int id = hostNr*urlNr;
       urls.push_back(DownloadElem{
-          {"https://url" + std::to_string(hostNr) + ".com/" + std::to_string(urlNr), hostNr * urlNr}, [](auto) {}});
+          {"https://url" + std::to_string(hostNr) + ".com/" + std::to_string(urlNr), id}, [](auto) {}});
     }
   EXPECT_CALL(dispatcherMock, doGetUrls()).WillOnce(Return(urls));
   EXPECT_CALL(downloaderMock, doDownloadProxy(_)).Times(nrHosts + nrHosts * urlsPerHost);

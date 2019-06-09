@@ -22,7 +22,7 @@ public:
       : m_download{std::move(download)}
       , m_maxContentLength{maxContentLength}
       , m_content{}
-      , m_easyDownloadManager(const_cast<char*>(std::get<0>(m_download.url).c_str()),
+      , m_easyDownloadManager(const_cast<char*>(m_download.url.url.c_str()),
                               /* callback data ptr */ this,
                               /* callback header func */ &headerCb,
                               /* callback write function */ &writeCb,
@@ -133,7 +133,7 @@ void
 DownloadManager::Pimpl::reuse(DownloadElem&& download) {
   m_easyMultiManager.release();
   m_download = std::move(download);
-  m_easyDownloadManager.reuse(const_cast<char*>(std::get<0>(m_download.url).c_str()), this, headerCb, writeCb);
+  m_easyDownloadManager.reuse(const_cast<char*>(m_download.url.url.c_str()), this, headerCb, writeCb);
   m_easyMultiManager.reuse();
   m_errorStream.str("");
   m_headerHandler.reuse();
