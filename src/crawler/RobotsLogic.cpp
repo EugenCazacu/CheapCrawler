@@ -69,8 +69,8 @@ struct FilterAndAddDownloads {
   }
 };
 
-[[nodiscard]]
-constexpr std::string_view toStringView(const UriTextRangeA& textRange) noexcept {
+[[nodiscard]] constexpr std::string_view
+toStringView(const UriTextRangeA& textRange) noexcept {
   return std::string_view { textRange.first, static_cast<std::string_view::size_type>(textRange.afterLast-textRange.first)};
 }
 

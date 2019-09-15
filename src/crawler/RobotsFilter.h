@@ -5,6 +5,7 @@
 
 struct RobotsFilter {
   constexpr RobotsFilter(std::string_view robotsTxt) {
+    
   }
   [[nodiscard]] bool
   canDownload(std::string_view url) const;
