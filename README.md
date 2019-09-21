@@ -61,8 +61,9 @@ compile it on Linux.
 To be able to use CheapCrawler you will need the following:
 * macOS or Linux
 * [cmake](https://cmake.org) 3.1 or above
-* [conan](https://conan.io)
+* [conan](https://conan.io) with [bincrafters](https://bincrafters.github.io) remote
 * [uriparser](https://github.com/uriparser/uriparser)
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
 
 ### Build separately
 
