@@ -53,5 +53,6 @@ function(add_test_with_properties)
   endif()
 endfunction()
 
+add_subdirectory(utils)
 add_subdirectory(crawler)
 
