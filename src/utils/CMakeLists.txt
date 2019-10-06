@@ -1,7 +1,6 @@
 add_library(CheapCrawlerUtils STATIC
   Logger.cpp
   DownloadResult.cpp
-  getLine.cpp
 )
 
 target_include_directories(CheapCrawlerUtils

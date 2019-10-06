@@ -1,4 +1,5 @@
 add_library(crawlerLibrary
+  RobotsTxtParser.cpp
   RobotsFilter.cpp
   CurlAsioDownloader.cpp
   RobotsLogic.cpp

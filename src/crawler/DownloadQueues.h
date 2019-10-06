@@ -11,6 +11,7 @@ struct PreparedDownloadElem {
   DownloadElem downloadElem;
   std::string_view scheme;
   std::string_view host;
+  std::string_view path;
 };
 
 inline std::ostream&

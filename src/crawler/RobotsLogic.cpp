@@ -66,6 +66,9 @@ struct FilterAndAddDownloads {
            };
       addDownload(dwQueue, std::move(dwElem));
     }
+    else {
+      //Robots.txt does not allow to download this URL, obey
+    }
   }
 };
 
@@ -106,6 +109,7 @@ populateDownloadQueuesWithRobots(DownloadQueues*                                
 
     const string_view scheme{toStringView(uri.scheme)};
     const string_view host{toStringView(uri.hostText)};
+    const string_view path{uri.pathHead->text.first};
     const Robot       robot{std::string{scheme}, std::string{host}};
     auto              robotIt = robots.find(robot);
     vector<PreparedDownloadElem>* urlList = nullptr;
@@ -119,15 +123,8 @@ populateDownloadQueuesWithRobots(DownloadQueues*                                
           dwQueue,
           PreparedDownloadElem{ DownloadElem{ {getRobotsTxtUrl(robot), 0},
                        [urls = std::move(urlListOwner), dwQueue, onFinishedDownload](DownloadResult&& robotsResult) {
-                         // TODO filter urllist by robots.txt
-                         // RobotsFilter robotsFilter;
-                         // bool parseRobotsResult { };
-                         // std::tie(robotsFilter, parseRobotsResult) = parse(robotsResult);
-                         // if(parseRobotsResult) {
-                         //   robotsFilter(urls);
-                         // }
                          std::for_each(begin(*urls), end(*urls),
-                             FilterAndAddDownloads { dwQueue, onFinishedDownload, RobotsFilter {robotsResult.content} } );
+                             FilterAndAddDownloads { dwQueue, onFinishedDownload, RobotsFilter {"TODO", robotsResult.content} } );
                          LOG_DEBUG("populateDownloadQueuesWithRobots: dwQueue: " << dwQueue);
                          onFinishedDownload(dwQueue);
                        }}, scheme, host});
@@ -135,7 +132,7 @@ populateDownloadQueuesWithRobots(DownloadQueues*                                
     else {
       urlList = robotIt->second;
     }
-    urlList->push_back(PreparedDownloadElem{std::move(urlElem), scheme, host});
+    urlList->push_back(PreparedDownloadElem{std::move(urlElem), scheme, host, path});
   }
   LOG_DEBUG("Total robot download: " << robots.size());
   LOG_DEBUG("Total number of download queues: " << dwQueues->size());
