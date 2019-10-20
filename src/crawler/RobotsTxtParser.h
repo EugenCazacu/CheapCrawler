@@ -5,6 +5,7 @@
 #include <string_view>
 #include <string>
 #include <optional>
+#include <iosfwd>
 
 /**
  * Returns the begin iterator and the paste the end iterator of a new line
@@ -50,6 +51,9 @@ class Rule {
     return m_hasEol;
   }
 
+  /**
+   * Returns the position of the wildcard in the rule if exists of -1 otherwise
+   */
   [[nodiscard]] int
   wildCardPos() const noexcept {
     return m_wildCardPos;
@@ -61,6 +65,9 @@ class Rule {
     bool m_hasEol;
     int m_wildCardPos;
 };
+
+std::ostream& operator<<(std::ostream& out, const RuleType& rule);
+std::ostream& operator<<(std::ostream& out, const Rule& rule);
 
 struct SpecificToGeneralComparer {
   bool operator()(const Rule& r1, const Rule& r2);

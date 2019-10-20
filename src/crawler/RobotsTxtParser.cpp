@@ -1,3 +1,6 @@
+#include "Logger.h"
+LOG_INIT(crawlerRobotsTxtParser);
+
 #include "RobotsTxtParser.h"
 #include "ctre.hpp"
 
@@ -118,6 +121,24 @@ Rule::Rule(RuleType itype, std::string ipath)
 {
 }
 
+std::ostream& operator<<(std::ostream& out, const RuleType& rule) {
+  if(RuleType::Allow == rule) {
+    out << "Allow";
+  }
+  else {
+    out << "Disallow";
+  }
+  return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const Rule& rule) {
+  out << "type:" << rule.type()
+    << " path: " << rule.path()
+    << " hasEol: " << rule.hasEol()
+    << " wildCardPos: " << rule.wildCardPos();
+  return out;
+}
+
 [[nodiscard]] std::optional<Rule>
 tryParseRule(std::string_view line) noexcept {
   static constexpr auto pattern = ctll::fixed_string{ "[ \\t]*(allow|disallow)[ \\t]*:[ \\t]*(/[^# \\t]*).*" };
@@ -134,10 +155,42 @@ SpecificToGeneralComparer::operator()(const Rule& r1, const Rule& r2) {
 }
 
 bool RuleMatcher::operator()(const Rule& rule) {
+  LOG_DEBUG("RuleMatcher: path:" << path << " rule: " << rule);
   if(rule.path().length() > path.length()) {
+    LOG_DEBUG("RuleMatche: rule pattern longer than path");
     return false;
   }
-  const auto result = std::mismatch(begin(rule.path()), end(rule.path()), begin(path));
-  return result.first == end(rule.path()) && (!rule.hasEol() || result.second==end(path));
+  if(rule.wildCardPos() == -1) {
+    LOG_DEBUG("RuleMatche: no wildcard");
+    const auto result = std::mismatch(begin(rule.path()), end(rule.path()), begin(path));
+    return result.first == end(rule.path()) && (!rule.hasEol() || result.second==end(path));
+  }
+  else {
+    LOG_DEBUG("RuleMatche: wildcard");
+    assert(rule.path().length() > rule.wildCardPos());
+    auto wildCardPos = begin(rule.path()) + rule.wildCardPos();
+    const auto resultForward = std::mismatch(begin(rule.path()), wildCardPos, begin(path));
+    if(resultForward.first != wildCardPos) {
+      LOG_DEBUG("RuleMatche: forward pass failed");
+      return false;
+    }
+    else {
+      const int remainingPathSize = path.length() - rule.wildCardPos();
+      const int remainingPatternSize = rule.path().length() - rule.wildCardPos();
+      const int nrAttempts = rule.hasEol() ? 1 : remainingPathSize - remainingPatternSize + 1;
+      LOG_DEBUG("RuleMatche: backward possible attempts: " << nrAttempts);
+      auto attemptStartPos = rbegin(path);
+      for(int attempt = 0; attempt < nrAttempts; ++attempt) {
+        auto rWildCardPos = std::make_reverse_iterator(wildCardPos);
+        const auto resultBackwards = std::mismatch(rbegin(rule.path()), rWildCardPos, attemptStartPos);
+        if(resultBackwards.first == rWildCardPos) {
+          return true;
+        }
+        ++attemptStartPos;
+      }
+      LOG_DEBUG("RuleMatche: all backwards passes failed");
+      return false;
+    }
+  }
 }
 

@@ -433,3 +433,118 @@ TEST(RuleMatcher, simpleMismatch) {
   EXPECT_FALSE(matcher(rule));
 }
 
+TEST(RuleMatcher, mismatchEol) {
+  Rule rule { RuleType::Allow, "/fis$" };
+  RuleMatcher matcher { "/fish" };
+  EXPECT_FALSE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchEol) {
+  Rule rule { RuleType::Allow, "/fish$" };
+  RuleMatcher matcher { "/fish" };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchWildcard) {
+  Rule rule { RuleType::Disallow, "/*.php" };
+  RuleMatcher matcher { "/fish.php" };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchWildcardWithEol) {
+  Rule rule { RuleType::Disallow, "/*.php$" };
+  RuleMatcher matcher { "/fish.php" };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, mismatchWildcardWithEol) {
+  Rule rule { RuleType::Disallow, "/*.php$" };
+  RuleMatcher matcher { "/fish.php." };
+  EXPECT_FALSE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchWildcardTrailingEol) {
+  Rule rule { RuleType::Disallow, "/*.php" };
+  RuleMatcher matcher { "/fish.php." };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchWildcardZeroMatches) {
+  EXPECT_TRUE(RuleMatcher{"/fish.php"}(Rule{RuleType::Allow, "/fish*.php"}));
+}
+
+TEST(RuleMatcher, matchWildcardTrailingEol2) {
+  Rule rule { RuleType::Disallow, "/abd*.php" };
+  RuleMatcher matcher { "/abd_fish.php/jkl" };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, matchGoogleSpecsExamples) {
+  //"/fish"
+  //Match:
+  EXPECT_TRUE(RuleMatcher{"/fish"                }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_TRUE(RuleMatcher{"/fish.html"           }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_TRUE(RuleMatcher{"/fishheads"           }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{ RuleType::Allow, "/fish" }));
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_FALSE(RuleMatcher{"/catfish"            }(Rule{ RuleType::Allow, "/fish" }));
+  EXPECT_FALSE(RuleMatcher{"/?id=fish"           }(Rule{ RuleType::Allow, "/fish" }));
+
+  //"/fish*"
+  //Match:
+  EXPECT_TRUE(RuleMatcher{"/fish"                }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_TRUE(RuleMatcher{"/fish.html"           }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_TRUE(RuleMatcher{"/fishheads"           }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{ RuleType::Allow, "/fish*" }));
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_FALSE(RuleMatcher{"/catfish"            }(Rule{ RuleType::Allow, "/fish*" }));
+  EXPECT_FALSE(RuleMatcher{"/?id=fish"           }(Rule{ RuleType::Allow, "/fish*" }));
+
+  //"/fish/"
+  //Match:
+  EXPECT_TRUE(RuleMatcher{"/fish/"               }(Rule{ RuleType::Allow, "/fish/" }));
+  EXPECT_TRUE(RuleMatcher{"/fish/?id=anything"   }(Rule{ RuleType::Allow, "/fish/" }));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish/" }));
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/fish"               }(Rule{ RuleType::Allow, "/fish/" }));
+  EXPECT_FALSE(RuleMatcher{"/fish.html"          }(Rule{ RuleType::Allow, "/fish/" }));
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish/" }));
+  EXPECT_FALSE(RuleMatcher{"/Fish/Salmon.asp"    }(Rule{ RuleType::Allow, "/fish/" }));
+
+  // "/*.php"
+  //Matches:
+  EXPECT_TRUE(RuleMatcher{"/filename.php"                  }(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/filename.php"           }(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/filename.php?parameters"}(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/any.php.file.html"      }(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/filename.php/"                 }(Rule{RuleType::Allow, "/*.php"}));
+
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/"           }(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_FALSE(RuleMatcher{"/windows.PHP"}(Rule{RuleType::Allow, "/*.php"}));
+
+
+  // "/*.php$"
+  //Matches:
+  EXPECT_TRUE(RuleMatcher{"/filename.php"       }(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/filename.php"}(Rule{RuleType::Allow, "/*.php$"}));
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/filename.php?parameters"}(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/filename.php/"          }(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/filename.php5"          }(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/windows.PHP"            }(Rule{RuleType::Allow, "/*.php$"}));
+
+  // "/fish*.php"
+  //Matches:
+  EXPECT_TRUE(RuleMatcher{"/fish.php"                        }(Rule{RuleType::Allow, "/fish*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/fishheads/catfish.php?parameters"}(Rule{RuleType::Allow, "/fish*.php"}));
+  //Mismatch
+  EXPECT_FALSE(RuleMatcher{"/Fish.PHP"}(Rule{RuleType::Allow, "/fish*.php"}));
+}
+
