@@ -56,28 +56,28 @@ TEST(getLine, oneLineTrailingLf) {
   std::string_view input{"123\r"};
   auto [resBegin, resEnd] = getLine(begin(input), end(input));
   EXPECT_EQ(begin(input), resBegin);
-  EXPECT_EQ(end(input)-1, resEnd);
+  EXPECT_EQ(end(input) - 1, resEnd);
 }
 
 TEST(getLine, oneLineStartCr) {
   std::string_view input{"\n123"};
   auto [resBegin, resEnd] = getLine(begin(input), end(input));
-  EXPECT_EQ(begin(input)+1, resBegin);
+  EXPECT_EQ(begin(input) + 1, resBegin);
   EXPECT_EQ(end(input), resEnd);
 }
 
 TEST(getLine, oneLineStartAndEndCr) {
   std::string_view input{"\n123\n"};
   auto [resBegin, resEnd] = getLine(begin(input), end(input));
-  EXPECT_EQ(begin(input)+1, resBegin);
-  EXPECT_EQ(end(input)-1, resEnd);
+  EXPECT_EQ(begin(input) + 1, resBegin);
+  EXPECT_EQ(end(input) - 1, resEnd);
 }
 
 TEST(getLine, twoLinesStartCr) {
   std::string_view input{"\n123\n 456"};
   auto [resBegin, resEnd] = getLine(begin(input), end(input));
-  EXPECT_EQ(begin(input)+1, resBegin);
-  EXPECT_EQ(begin(input)+4, resEnd);
+  EXPECT_EQ(begin(input) + 1, resBegin);
+  EXPECT_EQ(begin(input) + 4, resEnd);
 }
 
 TEST(tryMatchStartGroupLine, emptyLine) {
@@ -121,117 +121,117 @@ TEST(tryMatchStartGroupLine, agentWithStarAndComment) {
 }
 
 TEST(matchUserAgent, noMatchLongerGroupName) {
-  const std::string agentName { "google" };
-  const std::string currentGroupMatch {};
-  const std::string groupName { "googlebot" };
+  const std::string agentName{"google"};
+  const std::string currentGroupMatch{};
+  const std::string groupName{"googlebot"};
   EXPECT_EQ(AgentNameMatch::None, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchLongerAgentName) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch {};
-  const std::string groupName { "google" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{};
+  const std::string groupName{"google"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchSameAgentName) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch {};
-  const std::string groupName { "google" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{};
+  const std::string groupName{"google"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, emptyAgentNameThrow) {
-  const std::string currentGroupMatch {};
-  const std::string groupName { "*" };
-  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent( "", currentGroupMatch, groupName), std::logic_error );
+  const std::string currentGroupMatch{};
+  const std::string groupName{"*"};
+  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent("", currentGroupMatch, groupName), std::logic_error);
 }
 
 TEST(matchUserAgent, nullAgentNameThrow) {
-  const std::string currentGroupMatch {};
-  const std::string groupName { "*" };
-  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent( {}, currentGroupMatch, groupName), std::logic_error );
+  const std::string currentGroupMatch{};
+  const std::string groupName{"*"};
+  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent({}, currentGroupMatch, groupName), std::logic_error);
 }
 
 TEST(matchUserAgent, nullGroupNameThrow) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch {};
-  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent( agentName, currentGroupMatch, {}), std::logic_error );
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{};
+  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent(agentName, currentGroupMatch, {}), std::logic_error);
 }
 
 TEST(matchUserAgent, emptyGroupNameThrow) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch {};
-  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent( agentName, currentGroupMatch, ""), std::logic_error );
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{};
+  EXPECT_THROW([[maybe_unused]] auto res = matchUserAgent(agentName, currentGroupMatch, ""), std::logic_error);
 }
 
 TEST(matchUserAgent, matchStar) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch {};
-  const std::string groupName { "*" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{};
+  const std::string groupName{"*"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchOneCharWhenPrevStar) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "*" };
-  const std::string groupName { "g" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"*"};
+  const std::string groupName{"g"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchMoreCharsWhenPrevStar) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "*" };
-  const std::string groupName { "go" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"*"};
+  const std::string groupName{"go"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchMoreChars) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "google" };
-  const std::string groupName { "googleb" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"google"};
+  const std::string groupName{"googleb"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchMoreExact) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "google" };
-  const std::string groupName { "googlebot" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"google"};
+  const std::string groupName{"googlebot"};
   EXPECT_EQ(AgentNameMatch::Better, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchSameExact) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "googlebot" };
-  const std::string groupName { "googlebot" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"googlebot"};
+  const std::string groupName{"googlebot"};
   EXPECT_EQ(AgentNameMatch::Same, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, matchSame) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "google" };
-  const std::string groupName { "google" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"google"};
+  const std::string groupName{"google"};
   EXPECT_EQ(AgentNameMatch::Same, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, dontMatchStar) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "g" };
-  const std::string groupName { "*" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"g"};
+  const std::string groupName{"*"};
   EXPECT_EQ(AgentNameMatch::None, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, dontMatchShorter) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "googleb" };
-  const std::string groupName { "google" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"googleb"};
+  const std::string groupName{"google"};
   EXPECT_EQ(AgentNameMatch::None, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
 TEST(matchUserAgent, dontMatchLongerThanAgentName) {
-  const std::string agentName { "googlebot" };
-  const std::string currentGroupMatch { "googlebot" };
-  const std::string groupName { "googlebot-images" };
+  const std::string agentName{"googlebot"};
+  const std::string currentGroupMatch{"googlebot"};
+  const std::string groupName{"googlebot-images"};
   EXPECT_EQ(AgentNameMatch::None, matchUserAgent(agentName, currentGroupMatch, groupName));
 }
 
@@ -302,71 +302,71 @@ TEST(tryParseRule, allowEmpty) {
 }
 
 TEST(SpecificToGeneralComparer, ruleLength) {
-  Rule r1{ RuleType::Allow, "a"};
-  Rule r2{ RuleType::Allow, "abc"};
+  Rule                      r1{RuleType::Allow, "a"};
+  Rule                      r2{RuleType::Allow, "abc"};
   SpecificToGeneralComparer comparer;
   EXPECT_TRUE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, equalLen) {
-  Rule r1{ RuleType::Allow, "ac"};
-  Rule r2{ RuleType::Allow, "ab"};
+  Rule                      r1{RuleType::Allow, "ac"};
+  Rule                      r2{RuleType::Allow, "ab"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, equalLenWithWildcard) {
-  Rule r1{ RuleType::Allow, "*a**c"};
-  Rule r2{ RuleType::Allow, "ab*"};
+  Rule                      r1{RuleType::Allow, "*a**c"};
+  Rule                      r2{RuleType::Allow, "ab*"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, wildcardNotCounted) {
-  Rule r1{ RuleType::Allow, "ab"};
-  Rule r2{ RuleType::Allow, "*a"};
+  Rule                      r1{RuleType::Allow, "ab"};
+  Rule                      r2{RuleType::Allow, "*a"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_TRUE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, wildcardAtEndIgnored) {
-  Rule r1{ RuleType::Allow, "ab"};
-  Rule r2{ RuleType::Allow, "*a**"};
+  Rule                      r1{RuleType::Allow, "ab"};
+  Rule                      r2{RuleType::Allow, "*a**"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_TRUE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, onlyWildcardAtEnd) {
-  Rule r1{ RuleType::Allow, "ab*"};
-  Rule r2{ RuleType::Allow, "**"};
+  Rule                      r1{RuleType::Allow, "ab*"};
+  Rule                      r2{RuleType::Allow, "**"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_TRUE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, dollarWithWildcardAtEnd) {
-  Rule r1{ RuleType::Allow, "ab*$"};
-  Rule r2{ RuleType::Allow, "ab"};
+  Rule                      r1{RuleType::Allow, "ab*$"};
+  Rule                      r2{RuleType::Allow, "ab"};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
 TEST(SpecificToGeneralComparer, dollarAtEnd) {
-  Rule r1{ RuleType::Allow, "$"};
-  Rule r2{ RuleType::Allow, ""};
+  Rule                      r1{RuleType::Allow, "$"};
+  Rule                      r2{RuleType::Allow, ""};
   SpecificToGeneralComparer comparer;
   EXPECT_FALSE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
 TEST(Rule, noSpecials) {
-  Rule r1{ RuleType::Disallow, "no/specials"};
+  Rule r1{RuleType::Disallow, "no/specials"};
   EXPECT_STREQ("no/specials", r1.path().c_str());
   EXPECT_EQ(RuleType::Disallow, r1.type());
   EXPECT_FALSE(r1.hasEol());
@@ -374,7 +374,7 @@ TEST(Rule, noSpecials) {
 }
 
 TEST(Rule, ignoredWildcard) {
-  Rule r1{ RuleType::Disallow, "no/specials*"};
+  Rule r1{RuleType::Disallow, "no/specials*"};
   EXPECT_STREQ("no/specials", r1.path().c_str());
   EXPECT_EQ(RuleType::Disallow, r1.type());
   EXPECT_FALSE(r1.hasEol());
@@ -382,7 +382,7 @@ TEST(Rule, ignoredWildcard) {
 }
 
 TEST(Rule, ignoredEolWildcard) {
-  Rule r1{ RuleType::Disallow, "no/specials*$"};
+  Rule r1{RuleType::Disallow, "no/specials*$"};
   EXPECT_STREQ("no/specials", r1.path().c_str());
   EXPECT_EQ(RuleType::Disallow, r1.type());
   EXPECT_FALSE(r1.hasEol());
@@ -390,7 +390,7 @@ TEST(Rule, ignoredEolWildcard) {
 }
 
 TEST(Rule, ignoredMultiWildcards) {
-  Rule r1{ RuleType::Disallow, "no/specials*****$"};
+  Rule r1{RuleType::Disallow, "no/specials*****$"};
   EXPECT_STREQ("no/specials", r1.path().c_str());
   EXPECT_EQ(RuleType::Disallow, r1.type());
   EXPECT_FALSE(r1.hasEol());
@@ -398,7 +398,7 @@ TEST(Rule, ignoredMultiWildcards) {
 }
 
 TEST(Rule, wildcard) {
-  Rule r1{ RuleType::Allow, "*.php"};
+  Rule r1{RuleType::Allow, "*.php"};
   EXPECT_STREQ(".php", r1.path().c_str());
   EXPECT_EQ(RuleType::Allow, r1.type());
   EXPECT_FALSE(r1.hasEol());
@@ -406,7 +406,7 @@ TEST(Rule, wildcard) {
 }
 
 TEST(Rule, pathWithEol) {
-  Rule r1{ RuleType::Allow, "x.php$"};
+  Rule r1{RuleType::Allow, "x.php$"};
   EXPECT_STREQ("x.php", r1.path().c_str());
   EXPECT_EQ(RuleType::Allow, r1.type());
   EXPECT_TRUE(r1.hasEol());
@@ -414,7 +414,7 @@ TEST(Rule, pathWithEol) {
 }
 
 TEST(Rule, pathWithEolAndWildcard) {
-  Rule r1{ RuleType::Allow, "sss/*.php$"};
+  Rule r1{RuleType::Allow, "sss/*.php$"};
   EXPECT_STREQ("sss/.php", r1.path().c_str());
   EXPECT_EQ(RuleType::Allow, r1.type());
   EXPECT_TRUE(r1.hasEol());
@@ -422,50 +422,50 @@ TEST(Rule, pathWithEolAndWildcard) {
 }
 
 TEST(RuleMatcher, exactSimpleMatch) {
-  Rule rule { RuleType::Allow, "/fish" };
-  RuleMatcher matcher { "/fish" };
+  Rule        rule{RuleType::Allow, "/fish"};
+  RuleMatcher matcher{"/fish"};
   EXPECT_TRUE(matcher(rule));
 }
 
 TEST(RuleMatcher, simpleMismatch) {
-  Rule rule { RuleType::Allow, "/ish" };
-  RuleMatcher matcher { "fish" };
+  Rule        rule{RuleType::Allow, "/ish"};
+  RuleMatcher matcher{"fish"};
   EXPECT_FALSE(matcher(rule));
 }
 
 TEST(RuleMatcher, mismatchEol) {
-  Rule rule { RuleType::Allow, "/fis$" };
-  RuleMatcher matcher { "/fish" };
+  Rule        rule{RuleType::Allow, "/fis$"};
+  RuleMatcher matcher{"/fish"};
   EXPECT_FALSE(matcher(rule));
 }
 
 TEST(RuleMatcher, matchEol) {
-  Rule rule { RuleType::Allow, "/fish$" };
-  RuleMatcher matcher { "/fish" };
+  Rule        rule{RuleType::Allow, "/fish$"};
+  RuleMatcher matcher{"/fish"};
   EXPECT_TRUE(matcher(rule));
 }
 
 TEST(RuleMatcher, matchWildcard) {
-  Rule rule { RuleType::Disallow, "/*.php" };
-  RuleMatcher matcher { "/fish.php" };
+  Rule        rule{RuleType::Disallow, "/*.php"};
+  RuleMatcher matcher{"/fish.php"};
   EXPECT_TRUE(matcher(rule));
 }
 
 TEST(RuleMatcher, matchWildcardWithEol) {
-  Rule rule { RuleType::Disallow, "/*.php$" };
-  RuleMatcher matcher { "/fish.php" };
+  Rule        rule{RuleType::Disallow, "/*.php$"};
+  RuleMatcher matcher{"/fish.php"};
   EXPECT_TRUE(matcher(rule));
 }
 
 TEST(RuleMatcher, mismatchWildcardWithEol) {
-  Rule rule { RuleType::Disallow, "/*.php$" };
-  RuleMatcher matcher { "/fish.php." };
+  Rule        rule{RuleType::Disallow, "/*.php$"};
+  RuleMatcher matcher{"/fish.php."};
   EXPECT_FALSE(matcher(rule));
 }
 
 TEST(RuleMatcher, matchWildcardTrailingEol) {
-  Rule rule { RuleType::Disallow, "/*.php" };
-  RuleMatcher matcher { "/fish.php." };
+  Rule        rule{RuleType::Disallow, "/*.php"};
+  RuleMatcher matcher{"/fish.php."};
   EXPECT_TRUE(matcher(rule));
 }
 
@@ -474,77 +474,75 @@ TEST(RuleMatcher, matchWildcardZeroMatches) {
 }
 
 TEST(RuleMatcher, matchWildcardTrailingEol2) {
-  Rule rule { RuleType::Disallow, "/abd*.php" };
-  RuleMatcher matcher { "/abd_fish.php/jkl" };
+  Rule        rule{RuleType::Disallow, "/abd*.php"};
+  RuleMatcher matcher{"/abd_fish.php/jkl"};
   EXPECT_TRUE(matcher(rule));
 }
 
 TEST(RuleMatcher, matchGoogleSpecsExamples) {
   //"/fish"
-  //Match:
-  EXPECT_TRUE(RuleMatcher{"/fish"                }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_TRUE(RuleMatcher{"/fish.html"           }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_TRUE(RuleMatcher{"/fishheads"           }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{ RuleType::Allow, "/fish" }));
-  //Mismatch
-  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_FALSE(RuleMatcher{"/catfish"            }(Rule{ RuleType::Allow, "/fish" }));
-  EXPECT_FALSE(RuleMatcher{"/?id=fish"           }(Rule{ RuleType::Allow, "/fish" }));
+  // Match:
+  EXPECT_TRUE(RuleMatcher{"/fish"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_TRUE(RuleMatcher{"/fish.html"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_TRUE(RuleMatcher{"/fishheads"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{RuleType::Allow, "/fish"}));
+  // Mismatch
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_FALSE(RuleMatcher{"/catfish"}(Rule{RuleType::Allow, "/fish"}));
+  EXPECT_FALSE(RuleMatcher{"/?id=fish"}(Rule{RuleType::Allow, "/fish"}));
 
   //"/fish*"
-  //Match:
-  EXPECT_TRUE(RuleMatcher{"/fish"                }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_TRUE(RuleMatcher{"/fish.html"           }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_TRUE(RuleMatcher{"/fishheads"           }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{ RuleType::Allow, "/fish*" }));
-  //Mismatch
-  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_FALSE(RuleMatcher{"/catfish"            }(Rule{ RuleType::Allow, "/fish*" }));
-  EXPECT_FALSE(RuleMatcher{"/?id=fish"           }(Rule{ RuleType::Allow, "/fish*" }));
+  // Match:
+  EXPECT_TRUE(RuleMatcher{"/fish"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_TRUE(RuleMatcher{"/fish.html"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_TRUE(RuleMatcher{"/fishheads"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_TRUE(RuleMatcher{"/fishheads/yummy.html"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_TRUE(RuleMatcher{"/fish.php?id=anything"}(Rule{RuleType::Allow, "/fish*"}));
+  // Mismatch
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_FALSE(RuleMatcher{"/catfish"}(Rule{RuleType::Allow, "/fish*"}));
+  EXPECT_FALSE(RuleMatcher{"/?id=fish"}(Rule{RuleType::Allow, "/fish*"}));
 
   //"/fish/"
-  //Match:
-  EXPECT_TRUE(RuleMatcher{"/fish/"               }(Rule{ RuleType::Allow, "/fish/" }));
-  EXPECT_TRUE(RuleMatcher{"/fish/?id=anything"   }(Rule{ RuleType::Allow, "/fish/" }));
-  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"    }(Rule{ RuleType::Allow, "/fish/" }));
-  //Mismatch
-  EXPECT_FALSE(RuleMatcher{"/fish"               }(Rule{ RuleType::Allow, "/fish/" }));
-  EXPECT_FALSE(RuleMatcher{"/fish.html"          }(Rule{ RuleType::Allow, "/fish/" }));
-  EXPECT_FALSE(RuleMatcher{"/Fish.asp"           }(Rule{ RuleType::Allow, "/fish/" }));
-  EXPECT_FALSE(RuleMatcher{"/Fish/Salmon.asp"    }(Rule{ RuleType::Allow, "/fish/" }));
+  // Match:
+  EXPECT_TRUE(RuleMatcher{"/fish/"}(Rule{RuleType::Allow, "/fish/"}));
+  EXPECT_TRUE(RuleMatcher{"/fish/?id=anything"}(Rule{RuleType::Allow, "/fish/"}));
+  EXPECT_TRUE(RuleMatcher{"/fish/salmon.html"}(Rule{RuleType::Allow, "/fish/"}));
+  // Mismatch
+  EXPECT_FALSE(RuleMatcher{"/fish"}(Rule{RuleType::Allow, "/fish/"}));
+  EXPECT_FALSE(RuleMatcher{"/fish.html"}(Rule{RuleType::Allow, "/fish/"}));
+  EXPECT_FALSE(RuleMatcher{"/Fish.asp"}(Rule{RuleType::Allow, "/fish/"}));
+  EXPECT_FALSE(RuleMatcher{"/Fish/Salmon.asp"}(Rule{RuleType::Allow, "/fish/"}));
 
   // "/*.php"
-  //Matches:
-  EXPECT_TRUE(RuleMatcher{"/filename.php"                  }(Rule{RuleType::Allow, "/*.php"}));
-  EXPECT_TRUE(RuleMatcher{"/folder/filename.php"           }(Rule{RuleType::Allow, "/*.php"}));
+  // Matches:
+  EXPECT_TRUE(RuleMatcher{"/filename.php"}(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/filename.php"}(Rule{RuleType::Allow, "/*.php"}));
   EXPECT_TRUE(RuleMatcher{"/folder/filename.php?parameters"}(Rule{RuleType::Allow, "/*.php"}));
-  EXPECT_TRUE(RuleMatcher{"/folder/any.php.file.html"      }(Rule{RuleType::Allow, "/*.php"}));
-  EXPECT_TRUE(RuleMatcher{"/filename.php/"                 }(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/folder/any.php.file.html"}(Rule{RuleType::Allow, "/*.php"}));
+  EXPECT_TRUE(RuleMatcher{"/filename.php/"}(Rule{RuleType::Allow, "/*.php"}));
 
-  //Mismatch
-  EXPECT_FALSE(RuleMatcher{"/"           }(Rule{RuleType::Allow, "/*.php"}));
+  // Mismatch
+  EXPECT_FALSE(RuleMatcher{"/"}(Rule{RuleType::Allow, "/*.php"}));
   EXPECT_FALSE(RuleMatcher{"/windows.PHP"}(Rule{RuleType::Allow, "/*.php"}));
 
-
   // "/*.php$"
-  //Matches:
-  EXPECT_TRUE(RuleMatcher{"/filename.php"       }(Rule{RuleType::Allow, "/*.php$"}));
+  // Matches:
+  EXPECT_TRUE(RuleMatcher{"/filename.php"}(Rule{RuleType::Allow, "/*.php$"}));
   EXPECT_TRUE(RuleMatcher{"/folder/filename.php"}(Rule{RuleType::Allow, "/*.php$"}));
-  //Mismatch
+  // Mismatch
   EXPECT_FALSE(RuleMatcher{"/filename.php?parameters"}(Rule{RuleType::Allow, "/*.php$"}));
-  EXPECT_FALSE(RuleMatcher{"/filename.php/"          }(Rule{RuleType::Allow, "/*.php$"}));
-  EXPECT_FALSE(RuleMatcher{"/filename.php5"          }(Rule{RuleType::Allow, "/*.php$"}));
-  EXPECT_FALSE(RuleMatcher{"/windows.PHP"            }(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/filename.php/"}(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/filename.php5"}(Rule{RuleType::Allow, "/*.php$"}));
+  EXPECT_FALSE(RuleMatcher{"/windows.PHP"}(Rule{RuleType::Allow, "/*.php$"}));
 
   // "/fish*.php"
-  //Matches:
-  EXPECT_TRUE(RuleMatcher{"/fish.php"                        }(Rule{RuleType::Allow, "/fish*.php"}));
+  // Matches:
+  EXPECT_TRUE(RuleMatcher{"/fish.php"}(Rule{RuleType::Allow, "/fish*.php"}));
   EXPECT_TRUE(RuleMatcher{"/fishheads/catfish.php?parameters"}(Rule{RuleType::Allow, "/fish*.php"}));
-  //Mismatch
+  // Mismatch
   EXPECT_FALSE(RuleMatcher{"/Fish.PHP"}(Rule{RuleType::Allow, "/fish*.php"}));
 }
-

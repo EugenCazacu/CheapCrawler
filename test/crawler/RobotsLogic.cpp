@@ -1,9 +1,9 @@
 #include "Logger.h"
 LOG_INIT(RobotsLogic_tests);
 
+#include "DownloadResult.h"
 #include "ResultCallbackMock.h"
 #include "RobotsLogic.h"
-#include "DownloadResult.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -180,11 +180,11 @@ TEST_F(RobotsLogicWithDownloadCallback, urlDownloadAfterFinishedRobots) {
 
 TEST_F(RobotsLogicWithDownloadCallback, missingRobotsTxtIsIgnored) {
   ResultCallbackMock sampleHost1Url1{"http://url.com", 2};
-  std::string sampleUrl1RobotsTxt{"http://url.com/robots.txt"};
-  Url sampleUrl1RobotsTxtUrl { sampleUrl1RobotsTxt };
-  DownloadResult failedRobotsTxtDownloadResult { sampleUrl1RobotsTxtUrl , std::string{ }, MediaType { }, /*success*/ false };
+  std::string        sampleUrl1RobotsTxt{"http://url.com/robots.txt"};
+  Url                sampleUrl1RobotsTxtUrl{sampleUrl1RobotsTxt};
+  DownloadResult failedRobotsTxtDownloadResult{sampleUrl1RobotsTxtUrl, std::string{}, MediaType{}, /*success*/ false};
 
-  populateDownloadQueuesWithRobots( &queues, std::vector<DownloadElem>{ sampleHost1Url1.enableDownload() }, [](auto){});
+  populateDownloadQueuesWithRobots(&queues, std::vector<DownloadElem>{sampleHost1Url1.enableDownload()}, [](auto) {});
   ASSERT_EQ(queues.size(), 1);
   auto downloadQueueIt = std::begin(queues);
   ASSERT_EQ(queues.size(downloadQueueIt), 1);
@@ -198,14 +198,15 @@ TEST_F(RobotsLogicWithDownloadCallback, missingRobotsTxtIsIgnored) {
 
 TEST_F(RobotsLogicWithDownloadCallback, allUrlsForbidden) {
   ResultCallbackMock sampleHost1Url1{"http://url.com", 2};
-  std::string sampleUrl1RobotsTxt{"http://url.com/robots.txt"};
-  Url sampleUrl1RobotsTxtUrl { sampleUrl1RobotsTxt };
-  std::string allUrlsForbiddenRobotsTxt = R"( User-agent: *
+  std::string        sampleUrl1RobotsTxt{"http://url.com/robots.txt"};
+  Url                sampleUrl1RobotsTxtUrl{sampleUrl1RobotsTxt};
+  std::string        allUrlsForbiddenRobotsTxt = R"( User-agent: *
 Disallow: /
 )";
 
-  DownloadResult robotsTxtDownloadResult { sampleUrl1RobotsTxtUrl , allUrlsForbiddenRobotsTxt, MediaType { }, /*success*/ true };
-  populateDownloadQueuesWithRobots( &queues, std::vector<DownloadElem>{ sampleHost1Url1.enableDownload() }, [](auto){});
+  DownloadResult robotsTxtDownloadResult{
+      sampleUrl1RobotsTxtUrl, allUrlsForbiddenRobotsTxt, MediaType{}, /*success*/ true};
+  populateDownloadQueuesWithRobots(&queues, std::vector<DownloadElem>{sampleHost1Url1.enableDownload()}, [](auto) {});
   ASSERT_EQ(queues.size(), 1);
   auto downloadQueueIt = std::begin(queues);
   ASSERT_EQ(queues.size(downloadQueueIt), 1);

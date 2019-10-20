@@ -1,8 +1,8 @@
 #include "Logger.h"
 LOG_INIT(crawler_tests);
 
-#include "ResultCallbackMock.h"
 #include "DownloadResult.h"
+#include "ResultCallbackMock.h"
 #include "crawler/crawler.h"
 
 #include "gmock/gmock.h"
@@ -317,9 +317,9 @@ TEST_P(CrawlerOnceFixture, testMaxActiveQueues) {
   urls.reserve(nrHosts * urlsPerHost);
   for(size_t hostNr = 0; hostNr < nrHosts; ++hostNr)
     for(size_t urlNr = 0; urlNr < urlsPerHost; ++urlNr) {
-      const int id = hostNr*urlNr;
-      urls.push_back(DownloadElem{
-          {"https://url" + std::to_string(hostNr) + ".com/" + std::to_string(urlNr), id}, [](auto) {}});
+      const int id = hostNr * urlNr;
+      urls.push_back(
+          DownloadElem{{"https://url" + std::to_string(hostNr) + ".com/" + std::to_string(urlNr), id}, [](auto) {}});
     }
   EXPECT_CALL(dispatcherMock, doGetUrls()).WillOnce(Return(urls));
   EXPECT_CALL(downloaderMock, doDownloadProxy(_)).Times(nrHosts + nrHosts * urlsPerHost);

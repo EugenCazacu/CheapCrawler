@@ -39,42 +39,46 @@ getRobotsTxtUrl(const Robot& robotId) {
 }
 
 struct FinishDownloadAdapter {
-  DownloadQueues::DownloadQueueIt dwQueueIt;
+  DownloadQueues::DownloadQueueIt                      dwQueueIt;
   std::function<void(DownloadQueues::DownloadQueueIt)> additionalCb;
 
   void operator()(DownloadElem& dwElem) {
-    dwElem.callback = [additionalCb=this->additionalCb, dwQueueIt=this->dwQueueIt, originalCb=std::move(dwElem.callback)]
-        ( DownloadResult&& dwResult) {
-        LOG_DEBUG("Finished downloading: " << dwResult.url);
-        originalCb(std::move(dwResult));
-        additionalCb(dwQueueIt);
-      };
+    dwElem.callback = [additionalCb = this->additionalCb,
+                       dwQueueIt    = this->dwQueueIt,
+                       originalCb   = std::move(dwElem.callback)](DownloadResult&& dwResult) {
+      LOG_DEBUG("Finished downloading: " << dwResult.url);
+      originalCb(std::move(dwResult));
+      additionalCb(dwQueueIt);
+    };
   }
 };
 
 struct FilterAndAddDownloads {
-  DownloadQueues::DownloadQueueIt dwQueue;
+  DownloadQueues::DownloadQueueIt                      dwQueue;
   std::function<void(DownloadQueues::DownloadQueueIt)> additionalCb;
-  RobotsFilter robotsFilter;
+  RobotsFilter                                         robotsFilter;
 
   void operator()(PreparedDownloadElem& dwElem) {
     if(robotsFilter.canDownload(dwElem.downloadElem.url.url)) {
-      dwElem.downloadElem.callback =
-        [dwQueue=this->dwQueue, additionalCb=this->additionalCb, dwFinishedCb=std::move(dwElem.downloadElem.callback)](DownloadResult&& dwResult) {
-             dwFinishedCb(std::move(dwResult));
-             additionalCb(dwQueue);
-           };
+      dwElem.downloadElem.callback
+          = [dwQueue      = this->dwQueue,
+             additionalCb = this->additionalCb,
+             dwFinishedCb = std::move(dwElem.downloadElem.callback)](DownloadResult&& dwResult) {
+              dwFinishedCb(std::move(dwResult));
+              additionalCb(dwQueue);
+            };
       addDownload(dwQueue, std::move(dwElem));
     }
     else {
-      //Robots.txt does not allow to download this URL, obey
+      // Robots.txt does not allow to download this URL, obey
     }
   }
 };
 
 [[nodiscard]] constexpr std::string_view
 toStringView(const UriTextRangeA& textRange) noexcept {
-  return std::string_view { textRange.first, static_cast<std::string_view::size_type>(textRange.afterLast-textRange.first)};
+  return std::string_view{textRange.first,
+                          static_cast<std::string_view::size_type>(textRange.afterLast - textRange.first)};
 }
 
 } // namespace
@@ -107,11 +111,11 @@ populateDownloadQueuesWithRobots(DownloadQueues*                                
       continue;
     }
 
-    const string_view scheme{toStringView(uri.scheme)};
-    const string_view host{toStringView(uri.hostText)};
-    const string_view path{uri.pathHead->text.first};
-    const Robot       robot{std::string{scheme}, std::string{host}};
-    auto              robotIt = robots.find(robot);
+    const string_view             scheme{toStringView(uri.scheme)};
+    const string_view             host{toStringView(uri.hostText)};
+    const string_view             path{uri.pathHead->text.first};
+    const Robot                   robot{std::string{scheme}, std::string{host}};
+    auto                          robotIt = robots.find(robot);
     vector<PreparedDownloadElem>* urlList = nullptr;
     if(end(robots) == robotIt) {
       auto urlListOwner = std::make_shared<vector<PreparedDownloadElem>>();
@@ -119,15 +123,20 @@ populateDownloadQueuesWithRobots(DownloadQueues*                                
       robots[robot]     = urlList;
 
       DownloadQueues::DownloadQueueIt dwQueue = dwQueues->getQueueByHost(host);
-      addDownload(
-          dwQueue,
-          PreparedDownloadElem{ DownloadElem{ {getRobotsTxtUrl(robot), 0},
-                       [urls = std::move(urlListOwner), dwQueue, onFinishedDownload](DownloadResult&& robotsResult) {
-                         std::for_each(begin(*urls), end(*urls),
-                             FilterAndAddDownloads { dwQueue, onFinishedDownload, RobotsFilter {"TODO", robotsResult.content} } );
-                         LOG_DEBUG("populateDownloadQueuesWithRobots: dwQueue: " << dwQueue);
-                         onFinishedDownload(dwQueue);
-                       }}, scheme, host});
+      addDownload(dwQueue,
+                  PreparedDownloadElem{
+                      DownloadElem{
+                          {getRobotsTxtUrl(robot), 0},
+                          [urls = std::move(urlListOwner), dwQueue, onFinishedDownload](DownloadResult&& robotsResult) {
+                            std::for_each(begin(*urls),
+                                          end(*urls),
+                                          FilterAndAddDownloads{
+                                              dwQueue, onFinishedDownload, RobotsFilter{"TODO", robotsResult.content}});
+                            LOG_DEBUG("populateDownloadQueuesWithRobots: dwQueue: " << dwQueue);
+                            onFinishedDownload(dwQueue);
+                          }},
+                      scheme,
+                      host});
     }
     else {
       urlList = robotIt->second;

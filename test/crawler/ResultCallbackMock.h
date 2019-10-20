@@ -28,7 +28,4 @@ private:
   DownloadElem dwElem;
 };
 
-
 #endif /* end of include guard: CRAWLER_RESULTCALLBACKMOCK_H_KI1INH8A */
-
-

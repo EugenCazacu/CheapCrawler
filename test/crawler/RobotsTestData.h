@@ -3,7 +3,7 @@
 
 constexpr char RobotsTxt_Empty[] = "";
 
-constexpr char RobotsTxt_AllUrlsAllowed[] = R"( User-agent: *
+constexpr char RobotsTxt_AllUrlsAllowed[]   = R"( User-agent: *
 Disallow:
 )";
 constexpr char RobotsTxt_AllUrlsForbidden[] = R"( User-agent: *

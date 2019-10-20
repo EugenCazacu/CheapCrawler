@@ -1,8 +1,8 @@
 #include "RobotsFilter.h"
 
 RobotsFilter::RobotsFilter(const std::string& agentName, std::string_view robotsTxt) {
-  auto robotsTxtPos = begin(robotsTxt);
-  bool matching = false;
+  auto        robotsTxtPos = begin(robotsTxt);
+  bool        matching     = false;
   std::string currentAgentNameMatch;
   do {
     std::string_view::iterator nextLineEnd;
@@ -10,8 +10,8 @@ RobotsFilter::RobotsFilter(const std::string& agentName, std::string_view robots
     if(end(robotsTxt) == robotsTxtPos) {
       break;
     }
-    const std::string_view line(robotsTxtPos, nextLineEnd-robotsTxtPos);
-    robotsTxtPos = nextLineEnd;
+    const std::string_view line(robotsTxtPos, nextLineEnd - robotsTxtPos);
+    robotsTxtPos             = nextLineEnd;
     const auto userAgentName = tryMatchStartGroupLine(line);
     if(userAgentName) {
       const auto matchResult = matchUserAgent(agentName, currentAgentNameMatch, *userAgentName);
@@ -41,4 +41,3 @@ RobotsFilter::canDownload(std::string_view path) const {
   auto ruleMatch = std::find_if(begin(m_rules), end(m_rules), RuleMatcher{});
   return end(m_rules) == ruleMatch || RuleType::Allow == ruleMatch->type();
 }
-

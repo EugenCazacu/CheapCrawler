@@ -8,7 +8,7 @@
 #include <string_view>
 
 struct PreparedDownloadElem {
-  DownloadElem downloadElem;
+  DownloadElem     downloadElem;
   std::string_view scheme;
   std::string_view host;
   std::string_view path;
@@ -61,7 +61,8 @@ private:
   std::map<std::string, DownloadQueue, std::less<>> m_downloads;
 };
 
-inline void addDownload(DownloadQueues::DownloadQueueIt dwQueue, PreparedDownloadElem download) {
+inline void
+addDownload(DownloadQueues::DownloadQueueIt dwQueue, PreparedDownloadElem download) {
   dwQueue->second.emplace_back(std::move(download));
 }
 

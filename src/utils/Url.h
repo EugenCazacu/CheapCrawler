@@ -11,11 +11,11 @@ struct DownloadResult;
 
 struct Url {
   std::string url;
-  int id;
+  int         id;
 };
 
 struct DownloadElem {
-  Url url;
+  Url                                   url;
   std::function<void(DownloadResult&&)> callback;
 };
 
@@ -31,7 +31,8 @@ operator<<(std::ostream& out, const DownloadElem& dwElem) {
   return out;
 }
 
-inline bool operator==(const Url& url1, const Url& url2) {
+inline bool
+operator==(const Url& url1, const Url& url2) {
   return url1.url == url2.url && url1.id == url2.id;
 }
 
