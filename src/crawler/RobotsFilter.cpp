@@ -39,6 +39,6 @@ RobotsFilter::RobotsFilter(const std::string& agentName, std::string_view robots
 [[nodiscard]] bool
 RobotsFilter::canDownload(std::string_view path) const {
   auto ruleMatch = std::find_if(begin(m_rules), end(m_rules), RuleMatcher{});
-  return end(m_rules) == ruleMatch || RuleType::Allow == ruleMatch->type;
+  return end(m_rules) == ruleMatch || RuleType::Allow == ruleMatch->type();
 }
 

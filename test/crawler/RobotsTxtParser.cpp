@@ -238,57 +238,57 @@ TEST(matchUserAgent, dontMatchLongerThanAgentName) {
 TEST(tryParseRule, allowAll) {
   const auto resultRule = tryParseRule(" allow\t:/");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Allow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/");
+  EXPECT_EQ(resultRule->type(), RuleType::Allow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/");
 }
 
 TEST(tryParseRule, disallowAll) {
   const auto resultRule = tryParseRule(" disallow\t:/");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Disallow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/");
+  EXPECT_EQ(resultRule->type(), RuleType::Disallow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/");
 }
 
 TEST(tryParseRule, disallowStar) {
   const auto resultRule = tryParseRule(" disallow\t:/*");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Disallow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/*");
+  EXPECT_EQ(resultRule->type(), RuleType::Disallow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/*");
 }
 
 TEST(tryParseRule, allowSimple) {
   const auto resultRule = tryParseRule("allow: /xas");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Allow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/xas");
+  EXPECT_EQ(resultRule->type(), RuleType::Allow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/xas");
 }
 
 TEST(tryParseRule, allowWithComment) {
   const auto resultRule = tryParseRule("allow: /xas# DTES");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Allow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/xas");
+  EXPECT_EQ(resultRule->type(), RuleType::Allow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/xas");
 }
 
 TEST(tryParseRule, disallowWithSpaceAtEnd) {
   const auto resultRule = tryParseRule("disallow: /xas DTES");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Disallow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/xas");
+  EXPECT_EQ(resultRule->type(), RuleType::Disallow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/xas");
 }
 
 TEST(tryParseRule, allowWithTabAtEnd) {
   const auto resultRule = tryParseRule("allow: /xas\tDTES");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Allow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/xas");
+  EXPECT_EQ(resultRule->type(), RuleType::Allow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/xas");
 }
 
 TEST(tryParseRule, disallowSimple) {
   const auto resultRule = tryParseRule("disallow: /s");
   ASSERT_TRUE(resultRule);
-  EXPECT_EQ(resultRule->type, RuleType::Disallow);
-  EXPECT_STREQ(resultRule->path.c_str(), "/s");
+  EXPECT_EQ(resultRule->type(), RuleType::Disallow);
+  EXPECT_STREQ(resultRule->path().c_str(), "/s");
 }
 
 TEST(tryParseRule, disallowEmpty) {
@@ -309,13 +309,127 @@ TEST(SpecificToGeneralComparer, ruleLength) {
   EXPECT_FALSE(comparer(r1, r2));
 }
 
-TEST(SpecificToGeneralComparer, wildcardIsAlwaysMoreGeneric) {
-  Rule r1{ RuleType::Allow, "a"};
-  Rule r2{ RuleType::Allow, "*abc"};
+TEST(SpecificToGeneralComparer, equalLen) {
+  Rule r1{ RuleType::Allow, "ac"};
+  Rule r2{ RuleType::Allow, "ab"};
   SpecificToGeneralComparer comparer;
-  EXPECT_TRUE(comparer(r2, r1));
+  EXPECT_FALSE(comparer(r2, r1));
   EXPECT_FALSE(comparer(r1, r2));
 }
 
+TEST(SpecificToGeneralComparer, equalLenWithWildcard) {
+  Rule r1{ RuleType::Allow, "*a**c"};
+  Rule r2{ RuleType::Allow, "ab*"};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_FALSE(comparer(r1, r2));
+}
 
+TEST(SpecificToGeneralComparer, wildcardNotCounted) {
+  Rule r1{ RuleType::Allow, "ab"};
+  Rule r2{ RuleType::Allow, "*a"};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_TRUE(comparer(r1, r2));
+}
+
+TEST(SpecificToGeneralComparer, wildcardAtEndIgnored) {
+  Rule r1{ RuleType::Allow, "ab"};
+  Rule r2{ RuleType::Allow, "*a**"};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_TRUE(comparer(r1, r2));
+}
+
+TEST(SpecificToGeneralComparer, onlyWildcardAtEnd) {
+  Rule r1{ RuleType::Allow, "ab*"};
+  Rule r2{ RuleType::Allow, "**"};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_TRUE(comparer(r1, r2));
+}
+
+TEST(SpecificToGeneralComparer, dollarWithWildcardAtEnd) {
+  Rule r1{ RuleType::Allow, "ab*$"};
+  Rule r2{ RuleType::Allow, "ab"};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_FALSE(comparer(r1, r2));
+}
+
+TEST(SpecificToGeneralComparer, dollarAtEnd) {
+  Rule r1{ RuleType::Allow, "$"};
+  Rule r2{ RuleType::Allow, ""};
+  SpecificToGeneralComparer comparer;
+  EXPECT_FALSE(comparer(r2, r1));
+  EXPECT_FALSE(comparer(r1, r2));
+}
+
+TEST(Rule, noSpecials) {
+  Rule r1{ RuleType::Disallow, "no/specials"};
+  EXPECT_STREQ("no/specials", r1.path().c_str());
+  EXPECT_EQ(RuleType::Disallow, r1.type());
+  EXPECT_FALSE(r1.hasEol());
+  EXPECT_EQ(-1, r1.wildCardPos());
+}
+
+TEST(Rule, ignoredWildcard) {
+  Rule r1{ RuleType::Disallow, "no/specials*"};
+  EXPECT_STREQ("no/specials", r1.path().c_str());
+  EXPECT_EQ(RuleType::Disallow, r1.type());
+  EXPECT_FALSE(r1.hasEol());
+  EXPECT_EQ(-1, r1.wildCardPos());
+}
+
+TEST(Rule, ignoredEolWildcard) {
+  Rule r1{ RuleType::Disallow, "no/specials*$"};
+  EXPECT_STREQ("no/specials", r1.path().c_str());
+  EXPECT_EQ(RuleType::Disallow, r1.type());
+  EXPECT_FALSE(r1.hasEol());
+  EXPECT_EQ(-1, r1.wildCardPos());
+}
+
+TEST(Rule, ignoredMultiWildcards) {
+  Rule r1{ RuleType::Disallow, "no/specials*****$"};
+  EXPECT_STREQ("no/specials", r1.path().c_str());
+  EXPECT_EQ(RuleType::Disallow, r1.type());
+  EXPECT_FALSE(r1.hasEol());
+  EXPECT_EQ(-1, r1.wildCardPos());
+}
+
+TEST(Rule, wildcard) {
+  Rule r1{ RuleType::Allow, "*.php"};
+  EXPECT_STREQ(".php", r1.path().c_str());
+  EXPECT_EQ(RuleType::Allow, r1.type());
+  EXPECT_FALSE(r1.hasEol());
+  EXPECT_EQ(0, r1.wildCardPos());
+}
+
+TEST(Rule, pathWithEol) {
+  Rule r1{ RuleType::Allow, "x.php$"};
+  EXPECT_STREQ("x.php", r1.path().c_str());
+  EXPECT_EQ(RuleType::Allow, r1.type());
+  EXPECT_TRUE(r1.hasEol());
+  EXPECT_EQ(-1, r1.wildCardPos());
+}
+
+TEST(Rule, pathWithEolAndWildcard) {
+  Rule r1{ RuleType::Allow, "sss/*.php$"};
+  EXPECT_STREQ("sss/.php", r1.path().c_str());
+  EXPECT_EQ(RuleType::Allow, r1.type());
+  EXPECT_TRUE(r1.hasEol());
+  EXPECT_EQ(4, r1.wildCardPos());
+}
+
+TEST(RuleMatcher, exactSimpleMatch) {
+  Rule rule { RuleType::Allow, "/fish" };
+  RuleMatcher matcher { "/fish" };
+  EXPECT_TRUE(matcher(rule));
+}
+
+TEST(RuleMatcher, simpleMismatch) {
+  Rule rule { RuleType::Allow, "/ish" };
+  RuleMatcher matcher { "fish" };
+  EXPECT_FALSE(matcher(rule));
+}
 

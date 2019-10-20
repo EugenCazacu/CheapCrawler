@@ -6,6 +6,39 @@ namespace {
   isStar(std::string_view agentName) noexcept {
     return agentName == "*";
   }
+
+  /**
+   * Tell if the given path has an end of line match and if so removes it from io_param
+   * @returns true if path has valid eol
+   */
+  bool hasValidEolAndTrim(std::string& io_param) {
+    if(!std::empty(io_param) && '$' == io_param.back()) {
+      io_param.pop_back();
+      return std::empty(io_param) || io_param.back() != '*';
+    }
+    else {
+      return false;
+    }
+  }
+
+  /**
+   * Remove all wildcards from io_param
+   * @returns the position of the first non-trailing wildcard or -1
+   */
+  int removeWidcards(std::string& io_param) {
+    while( !empty(io_param) && '*' == io_param.back()) {
+      io_param.pop_back();
+    }
+    const auto wildcardPos = std::find(begin(io_param), end(io_param), '*');
+    if(end(io_param) == wildcardPos) {
+      return -1;
+    }
+    else {
+      int result = wildcardPos - begin(io_param);
+      io_param.erase(std::remove(wildcardPos, end(io_param), '*'), end(io_param));
+      return result;
+    }
+  }
 } //namespace <anonymous>
 
 [[nodiscard]] std::tuple<std::string_view::iterator, std::string_view::iterator>
@@ -77,6 +110,14 @@ matchUserAgent(std::string_view agentName, std::string_view currentGroupMatch, s
   }
 }
 
+Rule::Rule(RuleType itype, std::string ipath)
+  : m_type { itype }
+  , m_path { std::move(ipath) }
+  , m_hasEol { hasValidEolAndTrim(m_path) }
+  , m_wildCardPos { removeWidcards(m_path) }
+{
+}
+
 [[nodiscard]] std::optional<Rule>
 tryParseRule(std::string_view line) noexcept {
   static constexpr auto pattern = ctll::fixed_string{ "[ \\t]*(allow|disallow)[ \\t]*:[ \\t]*(/[^# \\t]*).*" };
@@ -89,6 +130,14 @@ tryParseRule(std::string_view line) noexcept {
 
 [[nodiscard]] bool
 SpecificToGeneralComparer::operator()(const Rule& r1, const Rule& r2) {
-  return r1.path.length() > r2.path.length();
+  return r1.path().length() > r2.path().length();
+}
+
+bool RuleMatcher::operator()(const Rule& rule) {
+  if(rule.path().length() > path.length()) {
+    return false;
+  }
+  const auto result = std::mismatch(begin(rule.path()), end(rule.path()), begin(path));
+  return result.first == end(rule.path()) && (!rule.hasEol() || result.second==end(path));
 }
 

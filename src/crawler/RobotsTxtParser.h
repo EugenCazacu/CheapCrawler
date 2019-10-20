@@ -31,9 +31,35 @@ enum class AgentNameMatch { None, Same, Better };
 matchUserAgent(std::string_view agentName, std::string_view currentGroupMatch, std::string_view groupName);
 
 enum class RuleType { Allow, Disallow };
-struct Rule {
-  RuleType type;
-  std::string path;
+class Rule {
+  public:
+  Rule(RuleType type, std::string path);
+
+  [[nodiscard]] RuleType
+  type() const noexcept {
+    return m_type;
+  }
+
+  [[nodiscard]] const std::string&
+  path() const noexcept {
+    return m_path;
+  }
+
+  [[nodiscard]] bool
+  hasEol() const noexcept {
+    return m_hasEol;
+  }
+
+  [[nodiscard]] int
+  wildCardPos() const noexcept {
+    return m_wildCardPos;
+  }
+
+  private:
+    RuleType m_type;
+    std::string m_path;
+    bool m_hasEol;
+    int m_wildCardPos;
 };
 
 struct SpecificToGeneralComparer {
@@ -42,9 +68,7 @@ struct SpecificToGeneralComparer {
 
 struct RuleMatcher {
   std::string_view path;
-  bool operator()(const Rule& rule) {
-    return true;
-  }
+  bool operator()(const Rule& rule);
 };
 
 /**
