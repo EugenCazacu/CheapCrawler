@@ -7,6 +7,13 @@
 
 TEST(RobotsFilter, init) { [[maybe_unused]] RobotsFilter robotsFilter{"TODO", RobotsTxt_Empty}; }
 
+TEST(RobotsFilter, matchAgentName) {
+  //!!!!
+  //RobotsFilter robotsFilter{"TODO", RobotsTxt_AllUrlsForbidden};
+  //EXPECT_FALSE(robotsFilter.canDownload("http://example.com"));
+  //EXPECT_FALSE(robotsFilter.canDownload("http://example.com/1"));
+}
+
 TEST(RobotsFilter, allUrlsAllowed) {
   RobotsFilter robotsFilter{"TODO", RobotsTxt_AllUrlsAllowed};
   EXPECT_TRUE(robotsFilter.canDownload(""));
