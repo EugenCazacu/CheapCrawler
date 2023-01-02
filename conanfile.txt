@@ -1,12 +1,17 @@
 [requires]
-boost_asio/1.69.0@bincrafters/stable
-boost_program_options/1.69.0@bincrafters/stable
-gtest/1.8.1@bincrafters/stable
-libcurl/7.61.1@bincrafters/stable
+asio/1.24.0
+boost/1.81.0
+gtest/1.12.1
+libcurl/7.86.0
+abseil/20220623.0
 
 [generators]
 cmake_paths
 cmake_find_package
+
+[options]
+#gtest:hide_symbols=True
+gtest:shared=True
 
 [imports]
 bin, *.dll -> ./bin # Copies all dll files from packages bin folder to my "bin" folder

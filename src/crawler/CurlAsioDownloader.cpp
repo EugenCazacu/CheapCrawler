@@ -15,6 +15,7 @@ LOG_INIT(crawlerCurlAsioDownloader);
 #include <boost/asio.hpp>
 #include <thread>
 #include <unordered_map>
+#include <list>
 
 using boost::asio::io_context;
 using BErrorCode = boost::system::error_code;

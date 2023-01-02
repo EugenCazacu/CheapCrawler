@@ -14,18 +14,22 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 endif ()
 
+set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+set (CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
+find_package(asio MODULE REQUIRED)
+find_package(absl MODULE REQUIRED)
 find_package(GTest MODULE REQUIRED)
-find_package(GMock MODULE REQUIRED)
-find_package(boost_program_options MODULE REQUIRED)
-find_package(boost_asio            MODULE REQUIRED)
-find_package(libcurl               MODULE REQUIRED)
+find_package(CURL MODULE REQUIRED)
+find_package(Boost MODULE REQUIRED COMPONENTS program_options)
 
 # These packages are not available with conan yet
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(URIPARSER REQUIRED IMPORTED_TARGET liburiparser)
 
+add_subdirectory(external)
 add_subdirectory(src)
 
 option(CHEAP_CRAWLER_RUN_TESTS "If enabled CheapCrawler tests will be run." OFF)

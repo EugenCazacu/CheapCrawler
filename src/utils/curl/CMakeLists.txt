@@ -15,7 +15,7 @@ target_include_directories(curlutils
 target_link_libraries(curlutils
   PRIVATE
     CheapCrawlerUtils
-    libcurl::libcurl
+    CURL::libcurl
 )
 
 

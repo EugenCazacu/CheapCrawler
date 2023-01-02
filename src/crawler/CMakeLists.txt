@@ -15,7 +15,7 @@ target_link_libraries(crawlerLibrary
     CheapCrawlerUtils
     uriUtilsLibrary
     curlutils
-    boost_asio::boost_asio
+    asio::asio
 )
 
 add_executable(crawlerDriver

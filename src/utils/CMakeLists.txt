@@ -10,7 +10,7 @@ target_include_directories(CheapCrawlerUtils
 
 target_link_libraries(CheapCrawlerUtils
   PUBLIC
-    boost_program_options::boost_program_options
+    Boost::program_options
 )
 
 add_library(gtestMainWithLogging STATIC
@@ -19,8 +19,8 @@ add_library(gtestMainWithLogging STATIC
 
 target_link_libraries(gtestMainWithLogging
   PUBLIC
-    GTest::GTest
-    GMock::GMock
+    GTest::gtest
+    GTest::gmock
   PRIVATE
     CheapCrawlerUtils
 )

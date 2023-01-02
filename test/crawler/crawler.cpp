@@ -241,7 +241,7 @@ struct CrawlerOnceFixture
   }
 };
 
-INSTANTIATE_TEST_CASE_P(VariousMaxDownloads, CrawlerOnceFixture, ::testing::Values(1, 5));
+INSTANTIATE_TEST_SUITE_P(VariousMaxDownloads, CrawlerOnceFixture, ::testing::Values(1, 5));
 
 MATCHER_P(match0thOfTuple, expected, "") { return (std::get<0>(arg) == expected); }
 MATCHER_P(robotEq, expected, "") { return expected == std::get<0>(arg.url); }
@@ -333,7 +333,7 @@ struct CrawlerWithTimeoutFixture : public CrawlerOnceFixture {
   CrawlerWithTimeoutFixture() : CrawlerOnceFixture{std::chrono::seconds{2}} {}
 };
 
-INSTANTIATE_TEST_CASE_P(PerHostTimeout, CrawlerWithTimeoutFixture, ::testing::Values(1, 5));
+INSTANTIATE_TEST_SUITE_P(PerHostTimeout, CrawlerWithTimeoutFixture, ::testing::Values(1, 5));
 
 TEST_P(CrawlerWithTimeoutFixture, timeBetweenDownloads) {
   EXPECT_CALL(dispatcherMock, doGetUrls())

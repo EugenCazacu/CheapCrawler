@@ -1,5 +1,5 @@
 PROJECT(robots)
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+#CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -60,18 +60,19 @@ INCLUDE(ExternalProject)
 
 ############ dependencies ##############
 
-CONFIGURE_FILE(CMakeLists.txt.in libs/CMakeLists.txt)
-EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
+#CONFIGURE_FILE(CMakeLists.txt.in libs/CMakeLists.txt)
+#EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
 
-IF(result)
-    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
-ENDIF()
+#IF(result)
+#    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
+#ENDIF()
 
-EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
+#EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . RESULT_VARIABLE result WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs)
 
-IF(result)
-    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
-ENDIF()
+
+#IF(result)
+#    MESSAGE(FATAL_ERROR "Failed to download dependencies: ${result}")
+#ENDIF()
 
 # abseil-cpp
 IF(MSVC)
@@ -84,17 +85,17 @@ IF(MSVC)
     ADD_DEFINITIONS(/DNOMINMAX /DWIN32_LEAN_AND_MEAN=1 /D_CRT_SECURE_NO_WARNINGS)
 ENDIF(MSVC)
 
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-src
-                 ${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-build
-                 EXCLUDE_FROM_ALL)
+#ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-src
+#                 ${CMAKE_CURRENT_BINARY_DIR}/libs/abseil-cpp-build
+#                 EXCLUDE_FROM_ALL)
 
 IF(ROBOTS_BUILD_TESTS)
     INCLUDE(CTest)
 
     # googletest
-    ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/gtest-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/libs/gtest-build
-                     EXCLUDE_FROM_ALL)
+    #ADD_SUBDIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/libs/gtest-src
+    #                 ${CMAKE_CURRENT_BINARY_DIR}/libs/gtest-build
+    #                 EXCLUDE_FROM_ALL)
 
     SET(INSTALL_GTEST 0)
     SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
